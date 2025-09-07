@@ -14,6 +14,7 @@ def stream_users_in_batches(batch_size):
 			batch = []
 	if batch:
 		yield batch
+	return
 	cursor.close()
 	connection.close()
 
