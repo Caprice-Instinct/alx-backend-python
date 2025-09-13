@@ -9,27 +9,17 @@
 # Use asyncio.run(fetch_concurrently()) to run the concurrent fetch
 
 import asyncio
-import sqlite3
+import aiosqlite
 
 async def async_fetch_users():
-    def fetch():
-        conn = sqlite3.connect('users.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users")
-        result = cursor.fetchall()
-        conn.close()
-        return result
-    return await asyncio.to_thread(fetch)
+    async with aiosqlite.connect('users.db') as db:
+        cursor = await db.execute("SELECT * FROM users")
+        return await cursor.fetchall()
 
 async def async_fetch_older_users():
-    def fetch():
-        conn = sqlite3.connect('users.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE age > 40")
-        result = cursor.fetchall()
-        conn.close()
-        return result
-    return await asyncio.to_thread(fetch)
+    async with aiosqlite.connect('users.db') as db:
+        cursor = await db.execute("SELECT * FROM users WHERE age > 40")
+        return await cursor.fetchall()
 
 async def fetch_concurrently():
     all_users, older_users = await asyncio.gather(
