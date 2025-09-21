@@ -6,8 +6,10 @@ from unittest.mock import patch, PropertyMock
 
 try:
     from parameterized import parameterized
+    PARAMETERIZED_AVAILABLE = True
 except ImportError:
-    # Create a dummy parameterized decorator for environments without it
+    PARAMETERIZED_AVAILABLE = False
+    # Create a dummy parameterized decorator
     class parameterized:
         @staticmethod
         def expand(test_cases):
