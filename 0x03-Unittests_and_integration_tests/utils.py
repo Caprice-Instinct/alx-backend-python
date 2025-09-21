@@ -29,7 +29,10 @@ def access_nested_map(nested_map: Mapping, path: Sequence) -> Any:
     1
     """
     for key in path:
-        nested_map = nested_map[key]
+        try:
+            nested_map = nested_map[key]
+        except (KeyError, TypeError) as e:
+            raise KeyError(key) from e
     return nested_map
 
 
