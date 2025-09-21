@@ -20,6 +20,11 @@ except ImportError:
     
     def parameterized_class(params):
         def decorator(cls):
+            # Set the fixture attributes on the class
+            if isinstance(params, list) and len(params) > 0:
+                if isinstance(params[0], dict):
+                    for key, value in params[0].items():
+                        setattr(cls, key, value)
             return cls
         return decorator
 
