@@ -12,7 +12,7 @@ class TestGithubOrgClient(unittest.TestCase):
 
     @patch('client.get_json')
     def test_org_google(self, mock_get_json):
-        """Test that GithubOrgClient.org returns the correct value for google"""
+        """Test that GithubOrgClient.org returns correct value for google"""
         test_client = GithubOrgClient("google")
         test_client.org()
         expected_url = "https://api.github.com/orgs/google"
