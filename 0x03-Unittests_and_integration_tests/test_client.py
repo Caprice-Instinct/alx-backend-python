@@ -5,9 +5,9 @@ import unittest
 from unittest.mock import patch, PropertyMock
 
 try:
-    from parameterized import parameterized
+    from parameterized import parameterized, parameterized_class
 except ImportError:
-    # Create a dummy parameterized decorator for environments without it
+    # Create dummy decorators for environments without parameterized
     class parameterized:
         @staticmethod
         def expand(test_cases):
@@ -17,6 +17,11 @@ except ImportError:
                         func(self, *case)
                 return wrapper
             return decorator
+    
+    def parameterized_class(params):
+        def decorator(cls):
+            return cls
+        return decorator
 
 from client import GithubOrgClient
 
@@ -73,3 +78,52 @@ class TestGithubOrgClient(unittest.TestCase):
         """Test GithubOrgClient.has_license"""
         result = GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(result, expected)
+
+
+# Simple fixtures for integration tests
+org_payload = {
+    "login": "google",
+    "id": 1342004,
+    "repos_url": "https://api.github.com/orgs/google/repos",
+}
+
+repos_payload = [
+    {"name": "episodes.dart", "license": {"key": "bsd-3-clause"}},
+    {"name": "kratu", "license": {"key": "apache-2.0"}},
+]
+
+expected_repos = ["episodes.dart", "kratu"]
+apache2_repos = ["kratu"]
+
+
+@parameterized_class(('org_payload', 'repos_payload', 'expected_repos', 'apache2_repos'), [
+    (org_payload, repos_payload, expected_repos, apache2_repos),
+])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """Integration test class for GithubOrgClient
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up class fixtures"""
+        config = {'return_value.json.side_effect': [
+            cls.org_payload, cls.repos_payload,
+            cls.org_payload, cls.repos_payload
+        ]}
+        cls.get_patcher = patch('requests.get', **config)
+        cls.get_patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Tear down class fixtures"""
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        """Test public_repos method"""
+        client = GithubOrgClient("google")
+        self.assertEqual(client.public_repos(), self.expected_repos)
+
+    def test_public_repos_with_license(self):
+        """Test public_repos method with license"""
+        client = GithubOrgClient("google")
+        self.assertEqual(client.public_repos("apache-2.0"), self.apache2_repos)
