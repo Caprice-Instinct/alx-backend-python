@@ -101,17 +101,14 @@ expected_repos = ["episodes.dart", "kratu"]
 apache2_repos = ["kratu"]
 
 
-@parameterized_class([
-    {
-        'org_payload': org_payload,
-        'repos_payload': repos_payload,
-        'expected_repos': expected_repos,
-        'apache2_repos': apache2_repos,
-    },
-])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration test class for GithubOrgClient
     """
+    
+    org_payload = org_payload
+    repos_payload = repos_payload
+    expected_repos = expected_repos
+    apache2_repos = apache2_repos
     
 
 
