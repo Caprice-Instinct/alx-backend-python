@@ -6,6 +6,17 @@ from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
 
 
+def parameterized_expand(test_cases):
+    """Simple parameterized decorator replacement"""
+    def decorator(func):
+        def wrapper(self):
+            for i, case in enumerate(test_cases):
+                with self.subTest(i=i):
+                    func(self, *case)
+        return wrapper
+    return decorator
+
+
 class TestGithubOrgClient(unittest.TestCase):
     """Test class for GithubOrgClient
     """
@@ -13,18 +24,14 @@ class TestGithubOrgClient(unittest.TestCase):
     @patch('client.get_json')
     def test_org(self, mock_get_json):
         """Test that GithubOrgClient.org returns the correct value"""
-        # Test google
-        test_client = GithubOrgClient("google")
-        test_client.org()
-        expected_url = "https://api.github.com/orgs/google"
-        mock_get_json.assert_called_with(expected_url)
-        mock_get_json.reset_mock()
-        
-        # Test abc
-        test_client = GithubOrgClient("abc")
-        test_client.org()
-        expected_url = "https://api.github.com/orgs/abc"
-        mock_get_json.assert_called_with(expected_url)
+        test_cases = [("google",), ("abc",)]
+        for org_name, in test_cases:
+            with self.subTest(org=org_name):
+                test_client = GithubOrgClient(org_name)
+                test_client.org()
+                expected_url = f"https://api.github.com/orgs/{org_name}"
+                mock_get_json.assert_called_with(expected_url)
+                mock_get_json.reset_mock()
 
     def test_public_repos_url(self):
         """Test GithubOrgClient._public_repos_url"""
@@ -56,12 +63,11 @@ class TestGithubOrgClient(unittest.TestCase):
 
     def test_has_license(self):
         """Test GithubOrgClient.has_license"""
-        # Test case 1: matching license
-        repo = {"license": {"key": "my_license"}}
-        result = GithubOrgClient.has_license(repo, "my_license")
-        self.assertTrue(result)
-        
-        # Test case 2: non-matching license
-        repo = {"license": {"key": "other_license"}}
-        result = GithubOrgClient.has_license(repo, "my_license")
-        self.assertFalse(result)
+        test_cases = [
+            ({"license": {"key": "my_license"}}, "my_license", True),
+            ({"license": {"key": "other_license"}}, "my_license", False),
+        ]
+        for repo, license_key, expected in test_cases:
+            with self.subTest(repo=repo, license_key=license_key):
+                result = GithubOrgClient.has_license(repo, license_key)
+                self.assertEqual(result, expected)
