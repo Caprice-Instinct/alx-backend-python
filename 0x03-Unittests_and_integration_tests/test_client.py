@@ -4,6 +4,7 @@
 import unittest
 from unittest.mock import patch, PropertyMock
 from client import GithubOrgClient
+from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -71,19 +72,10 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration test class for GithubOrgClient
     """
 
-    org_payload = {
-        "login": "google",
-        "id": 1342004,
-        "repos_url": "https://api.github.com/orgs/google/repos",
-    }
-
-    repos_payload = [
-        {"name": "episodes.dart", "license": {"key": "bsd-3-clause"}},
-        {"name": "kratu", "license": {"key": "apache-2.0"}},
-    ]
-
-    expected_repos = ["episodes.dart", "kratu"]
-    apache2_repos = ["kratu"]
+    org_payload = org_payload
+    repos_payload = repos_payload
+    expected_repos = expected_repos
+    apache2_repos = apache2_repos
 
     @classmethod
     def setUpClass(cls):
