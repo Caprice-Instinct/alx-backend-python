@@ -17,7 +17,7 @@ except ImportError:
                         func(self, *case)
                 return wrapper
             return decorator
-    
+
     def parameterized_class(params):
         def decorator(cls):
             # Set the fixture attributes on the class
@@ -104,13 +104,11 @@ apache2_repos = ["kratu"]
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration test class for GithubOrgClient
     """
-    
+
     org_payload = org_payload
     repos_payload = repos_payload
     expected_repos = expected_repos
     apache2_repos = apache2_repos
-    
-
 
     @classmethod
     def setUpClass(cls):
