@@ -19,7 +19,7 @@ class TestGithubOrgClient(unittest.TestCase):
         expected_url = "https://api.github.com/orgs/google"
         mock_get_json.assert_called_with(expected_url)
         mock_get_json.reset_mock()
-        
+
         # Test abc
         test_client = GithubOrgClient("abc")
         test_client.org()
@@ -60,7 +60,7 @@ class TestGithubOrgClient(unittest.TestCase):
         repo = {"license": {"key": "my_license"}}
         result = GithubOrgClient.has_license(repo, "my_license")
         self.assertTrue(result)
-        
+
         # Test case 2: non-matching license
         repo = {"license": {"key": "other_license"}}
         result = GithubOrgClient.has_license(repo, "my_license")
