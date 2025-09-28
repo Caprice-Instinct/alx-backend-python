@@ -11,5 +11,7 @@ conversation_router.register(r'messages', MessageViewSet, basename='conversation
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('', include(conversation_router.urls)),
+    path('', include(conversation_router.urls)),path("api/", include("chats.urls")),
+    path("api/auth/", include("chats.auth")),  # JWT login/refresh
+    path("api-auth/", include("rest_framework.urls")),  # DRF session auth
 ]
