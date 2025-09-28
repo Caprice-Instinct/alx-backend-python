@@ -1,23 +1,30 @@
 from rest_framework import serializers
 from .models import User, Conversation, Message
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['user_id', 'email', 'first_name', 'last_name', 'phone_number']
-        extra_kwargs = {'password': {'write_only': True}}
-
 class MessageSerializer(serializers.ModelSerializer):
-    sender = UserSerializer(read_only=True)
+    sender_name = serializers.CharField(source='sender.username', read_only=True)
 
     class Meta:
         model = Message
-        fields = ['message_id', 'conversation', 'sender', 'message_body', 'sent_at', 'created_at']
+        fields = ['id', 'message_body', 'sent_at', 'sender', 'sender_name']
 
 class ConversationSerializer(serializers.ModelSerializer):
-    participants = UserSerializer(many=True, read_only=True)
-    messages = MessageSerializer(many=True, read_only=True)
+    messages = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
-        fields = ['conversation_id', 'participants', 'messages']
+        fields = ['id', 'participants', 'messages']
+
+    def get_messages(self, obj):
+        messages = obj.messages.all()
+        return MessageSerializer(messages, many=True).data
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'phone_number']
+
+    def validate_email(self, value):
+        if not value:
+            raise serializers.ValidationError("Email is required")
+        return value
