@@ -19,7 +19,6 @@ class ConversationViewSet(viewsets.ModelViewSet):
         return self.queryset.filter(participants=self.request.user)
 
     def perform_create(self, serializer):
-        # Ensure the creator is automatically added as a participant
         conversation = serializer.save()
         conversation.participants.add(self.request.user)
         conversation.save()
@@ -35,8 +34,19 @@ class MessageViewSet(viewsets.ModelViewSet):
     ordering_fields = ["timestamp"]
 
     def get_queryset(self):
-        return self.queryset.filter(conversation__participants=self.request.user)
+        return Message.objects.filter(conversation__participants=self.request.user)
 
-    def perform_create(self, serializer):
-        # Ensure sender is always the logged-in user
-        serializer.save(sender=self.request.user)
+    def create(self, request, *args, **kwargs):
+        conversation_id = request.data.get("conversation_id")
+        try:
+            conversation = Conversation.objects.get(id=conversation_id)
+        except Conversation.DoesNotExist:
+            return Response({"error": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.user not in conversation.participants.all():
+            return Response({"error": "Not allowed"}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(sender=request.user, conversation=conversation)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
