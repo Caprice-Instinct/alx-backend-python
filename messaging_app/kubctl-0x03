@@ -1,0 +1,9 @@
+#!/bin/bash
+# Apply blue deployment with new image version
+kubectl apply -f blue_deployment.yaml
+# Monitor rollout status
+kubectl rollout status deployment/messaging-app-blue
+# Test for downtime
+for i in {1..20}; do curl -s http://localhost:8000/; sleep 1; done
+# Verify rolling update
+kubectl get pods
