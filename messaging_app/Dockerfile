@@ -27,5 +27,8 @@ COPY . /app/
 # Expose port 8000
 EXPOSE 8000
 
+# To run this container and expose port 8000, use:
+# docker run -p 8000:8000 <image_name>
+
 # Run migrations and start the server
 CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
