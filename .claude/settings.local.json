@@ -6,7 +6,9 @@
       "Bash(cat:*)",
       "Bash(python -m yaml:*)",
       "Bash(! grep -q \"MYSQL_DB:\" docker-compose.yml)",
-      "Bash(! grep -q \"python3 manage.py runserver\" docker-compose.yml)"
+      "Bash(! grep -q \"python3 manage.py runserver\" docker-compose.yml)",
+      "Bash(chmod:*)",
+      "Bash(! grep -q \"python3\" docker-compose.yml)"
     ],
     "deny": [],
     "ask": []
