@@ -1,8 +1,50 @@
 #!/bin/bash
+
+echo "=== Scaling Django App Deployment ==="
+echo ""
+
 # Scale Django app deployment to 3 replicas
+echo "Scaling deployment to 3 replicas..."
 kubectl scale deployment messaging-app --replicas=3
-kubectl get pods
-# Load testing with wrk (assumes wrk is installed)
-wrk -t2 -c100 -d30s http://localhost:8000/
+
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to scale deployment"
+    exit 1
+fi
+
+echo "✓ Deployment scaled successfully"
+echo ""
+
+# Wait for pods to be ready
+echo "Waiting for pods to be ready..."
+kubectl wait --for=condition=ready pod -l app=messaging-app --timeout=60s
+echo ""
+
+# Verify that multiple pods are running
+echo "Verifying pods are running..."
+kubectl get pods -l app=messaging-app
+echo ""
+
+# Load testing with wrk (if installed)
+echo "Performing load testing with wrk..."
+if command -v wrk &> /dev/null; then
+    echo "Running wrk load test (2 threads, 100 connections, 30 seconds)..."
+    wrk -t2 -c100 -d30s http://localhost:8000/
+    echo ""
+else
+    echo "Warning: wrk is not installed. Skipping load test."
+    echo "Install wrk from: https://github.com/wg/wrk"
+    echo ""
+fi
+
 # Monitor resource usage
-kubectl top pods
+echo "Monitoring resource usage..."
+if kubectl top pods &> /dev/null; then
+    kubectl top pods -l app=messaging-app
+else
+    echo "Note: Metrics server may not be available. Install it with:"
+    echo "kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml"
+fi
+echo ""
+
+echo "=== Scaling complete! ==="
